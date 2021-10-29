@@ -1,11 +1,12 @@
+<h1 align="center">
+  Browness
+</h1>
+
 <p align="center">
   <img src="https://img.shields.io/github/last-commit/Arthurcn96/Browness?logo=github&style=for-the-badge">
   <img src="https://img.shields.io/github/repo-size/Arthurcn96/Browness?style=for-the-badge&logo=appveyor">
   <img src="https://img.shields.io/badge/Status-Finalizado-red?style=for-the-badge&logo=appveyor">
 </p>
-
-
-# Browness
 
 Código de **visão computacinal** através da implementação do cálculo de Browness do [Aimonino](https://iris.unito.it/handle/2318/1564400) para detecção de tons de marron de uma imagem através da aplicação pixel a pixel.
 
