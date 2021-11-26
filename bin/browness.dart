@@ -1,6 +1,8 @@
 import 'package:image/image.dart';
 import 'dart:io';
 
+enum FiltroName { Teorico, Absoluto, Hibrido, NovoHibrido }
+
 void main() {
   List<int> aux;
 
@@ -9,22 +11,27 @@ void main() {
     for (var j = 0; j < 5; j++) {
       final image = decodePng(File('assets/IMD$i.png').readAsBytesSync())!;
       aux = intensidadeMaxMin(image, j);
-      browness(image, j, i, aux[0], aux[1]);
+      browness(image, j, FiltroName.Teorico, i, aux[0], aux[1]);
     }
   }
 }
 
-void espera() {
-  Future.delayed(const Duration(seconds: 5));
-}
-
 /// Aplicação do indice de marrom
-void browness(Image image, int k, int n, int max, int min) {
+/// image : Imagem que o filtro sera aplicado
+///
+/// `k` : Valor do k utilizado na formula
+///
+/// `n` : Iteracao oque esta ocorrendo
+///
+/// `max` : Valor do Pixel de maior intensidade
+///
+/// `min` : Valor do Pixel de menor intensidade
+void browness(Image image, int k, FiltroName filtro, int n, int max, int min) {
   var r = 0;
   var g = 0;
   var b = 0;
-
   var result = 0;
+  var out = 'out/';
 
   final p = image.getBytes();
 
@@ -37,32 +44,51 @@ void browness(Image image, int k, int n, int max, int min) {
     // Indice de marrom
     result = (k * r - g - b);
 
-    // Normalizacao dos valores ( entre 0 e 255)
+    switch (filtro) {
+      case FiltroName.Absoluto:
+        result = normalizacaoAbsoluta(result);
+        out += out.length < 5 ? 'ABS' : '';
+        break;
 
-    result = normalizacaoAbsoluta(result);
-    // result = normalizacaoHibrida(result, max, min);
-    // result = normalizacaoHibridaNova(result, k);
-    // result = normalizacaoTeorica(result, max, min);
+      case FiltroName.Hibrido:
+        result = normalizacaoHibrida(result, max, min);
+        out += out.length < 5 ? 'HIB' : '';
+        break;
 
-    r = g = b = result;
+      case FiltroName.NovoHibrido:
+        result = normalizacaoHibridaNova(result, k);
+        out += out.length < 5 ? 'NEW' : '';
+        break;
 
+      case FiltroName.Teorico:
+        result = normalizacaoTeorica(result, max, min);
+        out += out.length < 5 ? 'TEO' : '';
+        break;
+
+      default:
+        break;
+    }
     // Salvando o Pixel
-    p[i] = r;
-    p[i + 1] = g;
-    p[i + 2] = b;
+    p[i] = result;
+    p[i + 1] = result;
+    p[i + 2] = result;
   }
-  File('out/ABS/test$n k=$k.png').writeAsBytesSync(encodePng(image));
+  File('$out/test$n k=$k.png').writeAsBytesSync(encodePng(image));
 }
 
 ///   Retorna o valor de menor e maior intensidade da imagem
+///
+///   `src` : Imagem
+///
+///   `k` : Valor de K utilizado na funcao
 List<int> intensidadeMaxMin(Image src, int k) {
   var max = 0;
   var min = 10000;
   var result = 0;
   var r = 0, g = 0, b = 0;
 
+  // Transforma a imagem em uma lista RGBA
   final p = src.getBytes();
-
   for (var i = 0, len = p.length; i < len; i += 4) {
     // Carregando os RGB
     r = p[i];
@@ -81,6 +107,12 @@ List<int> intensidadeMaxMin(Image src, int k) {
 }
 
 /// Normalizacao
+///
+/// `p` : Valor resultado da funcao no Pixel
+///
+/// `r1` : Intensidade maxima da imagem
+///
+/// `r2` : Intensidade minima da imagem
 int normalizacaoTeorica(int p, int r1, int r2) {
   var normalizado = 0;
 
@@ -90,6 +122,12 @@ int normalizacaoTeorica(int p, int r1, int r2) {
 }
 
 /// Normalizacao utilizando valor absoluto
+///
+/// `p` : Valor resultado da funcao no Pixel
+///
+/// `r1` : Intensidade maxima da imagem
+///
+/// `r2` : Intensidade minima da imagem
 int normalizacaoHibrida(int p, int r1, int r2) {
   var normalizado = 0;
 
@@ -99,6 +137,10 @@ int normalizacaoHibrida(int p, int r1, int r2) {
 }
 
 /// Normalizacao que utiliza valores fixos dado valores de K = 0, 1 ou mais
+///
+/// `p` : Valor resultado da funcao no Pixel
+///
+/// `k` : Valor do k utilizado na formula
 int normalizacaoHibridaNova(int p, int k) {
   var normalizado = 0;
   var r1, r2;
@@ -119,10 +161,12 @@ int normalizacaoHibridaNova(int p, int k) {
 }
 
 /// Normalizacao simplificada
-int normalizacaoAbsoluta(int result) {
-  var abs = result.abs();
+///
+/// `result` : Valor resultado da funcao no Pixel
+int normalizacaoAbsoluta(int p) {
+  var abs = p.abs();
 
-  result = abs >= 255 ? 255 : abs;
+  p = abs >= 255 ? 255 : abs;
 
-  return result;
+  return p;
 }
