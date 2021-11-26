@@ -4,3 +4,10 @@
 
 # Conventional directory for build output.
 build/
+
+# As imagens utilizadas no programa
+assets/
+out/ABS
+out/HIB
+out/NEW
+out/TEO
