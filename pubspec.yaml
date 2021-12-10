@@ -13,4 +13,3 @@ dev_dependencies:
   pedantic: ^1.10.0
 dependencies: 
   image: ^3.0.2
-  opencv: ^1.0.4

@@ -4,6 +4,32 @@ import 'dart:io';
 enum FiltroName { Teorico, Absoluto, Hibrido, NovoHibrido }
 
 class Filtro {
+  void binarizacao(Image image) {
+    var r, g, b;
+    var threshold;
+
+    threshold = image.getWhiteBalance();
+
+// Transforma a imagem em uma lista RGBA
+    final p = image.getBytes();
+    for (var i = 0, len = p.length; i < len; i += 4) {
+      // Carregando os RGB
+      r = p[i];
+      g = p[i + 1];
+      b = p[i + 2];
+
+      if (r == g && g == b) {
+        p[i] = r <= threshold ? 0 : 255;
+        p[i + 1] = g <= threshold ? 0 : 255;
+        p[i + 2] = b <= threshold ? 0 : 255;
+      } else {
+        throw Exception('A imagem nao eh em tons de cinza');
+      }
+    }
+
+    File('out/BIN/binario.png').writeAsBytesSync(encodePng(image));
+  }
+
   /// Aplicação do indice de marrom
   /// image : Imagem que o filtro sera aplicado
   ///
